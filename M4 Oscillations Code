@@ -1,0 +1,66 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.integrate import odeint
+
+def represillator(initial,t,IPTG):
+    
+    #list out parameters
+    a0 = 1
+    a = 1000
+    b = 3
+    n = 2
+    Kd = 1.3e-4
+    
+    m_tetR = initial[0]
+    m_araC = initial[1]
+    m_lacI = initial[2]
+    p_tetR = initial[3]
+    p_araC = initial[4]
+    p_lacI = initial[5]
+    
+    val = np.zeros(6)
+    val[0] = -m_tetR + a / (1 + p_lacI**n) + a0 #tetR mRNA
+    val[1] = -m_araC + a / (1 + p_tetR**n) + a0 #araC mRNA
+    val[2] = -m_lacI + a / (1 + p_araC**n) + a0 #lacI mRNA
+    val[3] = -b * (p_tetR - m_tetR) #tetR protein
+    val[4] = -b * (p_araC - m_araC) #araC protein
+    val[5] = -b * (p_lacI - m_lacI) * (1- IPTG/(Kd + IPTG)) #lacI protein
+    
+    return val
+
+#define starting values and parameters
+initial = [1,1,1,0,0,0]
+parameters = (1,1000,5,2)
+IPTG = 0.00001
+
+time = np.linspace(0,600,10000)
+z = odeint(represillator,initial,time, args = (IPTG,))
+
+tetR = z[:,3]
+lacI = z[:,4]
+araC = z[:,5]
+
+tetR_mRNA = z[:,0]
+araC_mRNA = z[:,1]
+lacI_mRNA = z[:,2]
+
+fig = plt.figure(figsize=[14,8])
+ax = plt.subplot(111)
+ax.set_xlim(0, 1200)
+
+plt.grid(linestyle = '--', linewidth = 0.5, alpha = 0.8)
+ax.set_xlabel('Time', fontsize=15)
+ax.set_ylabel('Amount', fontsize=15)
+
+#plot mRNA
+
+plt.plot(tetR, color = 'firebrick', label='tetR')
+plt.plot(lacI, color = 'blueviolet', linestyle = 'dotted', label='lacI')
+plt.plot(araC, color = 'darkcyan', linestyle = '--', label='araC')
+
+ax.legend(prop={'size': 15})
+plt.show()
+
+#plt.savefig("IPTG00001", dpi = 300 )
+
+
