@@ -9,7 +9,7 @@ def represillator(initial,t,IPTG):
     a = 1000
     b = 3
     n = 2
-    Kd = 1.3e-4
+    Kd = 1e-6 #M
     
     m_tetR = initial[0]
     m_araC = initial[1]
